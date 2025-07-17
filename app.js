@@ -8,6 +8,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var tweetsRouter = require('./routes/tweets');
 var trendRouter = require('./routes/trend');
+require('./models/connection');
 
 var app = express();
 

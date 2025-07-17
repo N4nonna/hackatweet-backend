@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 
 const trendSchema = mongoose.Schema({
 	name: String,
-	nbTweets: [ ObjectId ],
+	tweets: [{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'tweets'}],
 });
 const Trend = mongoose.model('trends', trendSchema);
 

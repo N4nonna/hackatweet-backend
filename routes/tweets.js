@@ -7,6 +7,7 @@ const User = require('../models/users');
 
 // POST new tweet.
 router.post('/', function(req, res) {
+	console.log(req.body);
 	User.findOne({ token: req.body.token }).then(data => {
 		if(data) {
 			const newTweet = new Tweet({
@@ -15,17 +16,22 @@ router.post('/', function(req, res) {
 				likes: [''],
 				user: data._id,
 			});
-			newTweet.save();
-			res.json({result: true, token: data.token});
-			return ;
-		}
-		res.json({return: false, error: 'Wrong token.'});
+			newTweet.save().then(() => {
+				Tweet.find().populate({ path: 'user', select: 'name username pp -_id' }).then(tweets => {
+					if(tweets[0])
+						res.json({result: true, tweets});
+					else
+						res.json({ result: false, error: "No tweets registered." });
+				});
+			})
+		} else
+			res.json({return: false, error: 'Wrong token.'});
 	});
 });
 
 // GET all tweets
 router.get('/', function(req, res) {
-	Tweet.find().then(tweets => {
+	Tweet.find().populate({ path: 'user', select: 'name username pp -_id' }).then(tweets => {
 		if(tweets[0])
 			res.json({result: true, tweets });
 		else
@@ -38,7 +44,7 @@ router.delete('/', function(req, res) {
 	Tweet.deleteOne({ '_id': req.body.tweetId }).then(deletedDoc => {
 		if (deletedDoc.deletedCount > 0) {
       // document successfully deleted and return all tweets
-      Tweet.find().then(data => {
+      Tweet.find().populate({ path: 'user', select: 'name username pp -_id' }).then(data => {
 				if (data[0])
           res.json({ result: true, tweets: data });
 				else
@@ -56,7 +62,7 @@ router.put('/', function(req, res) {
 		if(data) {
 			userId = data._id.toString();
 			Tweet.findOne({ '_id': req.body.tweetId }).then(data => {
-				if(data.likes && data.likes.some(e => e === userId)) {
+				if(data.likes.some(e => e === userId)) {
 					Tweet.updateOne({ '_id': req.body.tweetId }, { $pull: { likes: `${userId}` } }).then(data => {
 						if(data) {
 							Tweet.findOne({ '_id': req.body.tweetId }).then(tweetData => {

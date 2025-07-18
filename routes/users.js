@@ -28,8 +28,8 @@ router.post('/signup', (req, res) => {
         pp: "https://i.pinimg.com/736x/44/de/75/44de75963e3a5ad52afda0591d6ae989.jpg"
       });
 
-      newUser.save().then(newDoc => {
-          res.json({ result: true, token: newDoc.token});
+      newUser.save().then(data => {
+          res.json({ result: true, token: data.token});
       });
     } else {
       // * User is already registered * //

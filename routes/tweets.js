@@ -12,7 +12,7 @@ router.post('/', function(req, res) {
 			const newTweet = new Tweet({
 				text: req.body.tweet,
 				createdAt: Date.now(),
-				likes: [],
+				likes: [''],
 				user: data._id,
 			});
 			newTweet.save();
@@ -56,8 +56,7 @@ router.put('/', function(req, res) {
 		if(data) {
 			userId = data._id.toString();
 			Tweet.findOne({ '_id': req.body.tweetId }).then(data => {
-				if(data.likes.some(e => e === userId)) {
-					console.log(`find ${data.likes.some(e => e === userId)}`)
+				if(data.likes && data.likes.some(e => e === userId)) {
 					Tweet.updateOne({ '_id': req.body.tweetId }, { $pull: { likes: `${userId}` } }).then(data => {
 						if(data) {
 							Tweet.findOne({ '_id': req.body.tweetId }).then(tweetData => {

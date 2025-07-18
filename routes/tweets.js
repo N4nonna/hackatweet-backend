@@ -49,15 +49,22 @@ router.delete('/', function(req, res) {
 	});
 });
 
-router.put('/', function(req, res, next) {
+// UPDATE likes count depending on if user already liked the tweet or not
+router.put('/', function(req, res) {
 	let userId;
 	User.findOne({ token: req.body.token }).then(data => {
 		if(data) {
 			userId = data._id.toString();
 			Tweet.findOne({ '_id': req.body.tweetId }).then(data => {
-				if(data.likes.includes(userId)) {
-					data.likes = data.likes.splice(userId, 1);
-					res.json({ result: true, likes: data.likes.length });
+				if(data.likes.some(e => e === userId)) {
+					console.log(`find ${data.likes.some(e => e === userId)}`)
+					Tweet.updateOne({ '_id': req.body.tweetId }, { $pull: { likes: `${userId}` } }).then(data => {
+						if(data) {
+							Tweet.findOne({ '_id': req.body.tweetId }).then(tweetData => {
+								res.json({ result: true, likes: tweetData.likes.length });
+							});
+						};
+					});
 				} else {
 					Tweet.updateOne({ '_id': req.body.tweetId }, { $addToSet: { likes: [`${userId}`] } }).then(data => {
 						if(data) {
